@@ -1,9 +1,8 @@
 #include <iostream>
 #include <fstream>
-#include <time.h>
 #include <string.h>
 using namespace std;
-//123
+
 template<class T>
 class Queue {
 public:
@@ -184,6 +183,7 @@ void back_to_charge(pos cur) {
 			map[tmp.r][tmp.c].type = -2;
 			unclean--;
 		}
+
 		if (tmp.c + 1 < C) {
 			if (BFS_battery[tmp.r][tmp.c + 1] == BFS_battery[tmp.r][tmp.c] - 1) {
 				tmp.c++;
@@ -333,8 +333,6 @@ void initail_BFS_battery() {
 
 int main() {
 
-	double START, END;
-	START = clock();
 
 	inputFile.open("floor.data");
 	if (!inputFile)
@@ -387,9 +385,6 @@ int main() {
 
 	inputFile.close();
 	outputFile.close();
-	END = clock();
-	cout << (END - START) / CLOCKS_PER_SEC << endl;
-	cout << count_step << endl;
 	return 0;
 }
 

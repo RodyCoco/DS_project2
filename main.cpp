@@ -1,6 +1,8 @@
 #include <iostream>
 #include <fstream>
+#include <time.h>
 #include <string.h>
+#include <queue>
 using namespace std;
 
 template<class T>
@@ -10,7 +12,7 @@ public:
 	~Queue() { delete queue; }
 	bool isempty() { return rear == front; }
 	T& Front() { return queue[front]; }
-	T& Rear() { return queue[(rear-1)% capacity]; }
+	T& Rear() { return queue[(rear - 1) % capacity]; }
 	void push(const T& x) {
 		if (isempty()) {
 			front = 0;
@@ -24,6 +26,7 @@ public:
 					tmp[i] = queue[(i + front) % capacity];
 				}
 				rear = capacity - 1;
+				front = 0;
 				capacity = 2 * capacity;
 				delete queue;
 				queue = tmp;
@@ -76,7 +79,6 @@ pos findunclean(pos cur) {
 	Queue<pos> Q;
 	Q.push(tmp);
 
-
 	BFScal[tmp.r][tmp.c] = 0;
 	visited[tmp.r][tmp.c] = true;
 	to_be_update.push(tmp);
@@ -111,7 +113,7 @@ pos findunclean(pos cur) {
 			if (map[tmp.r + 1][tmp.c].type != 1 && visited[tmp.r + 1][tmp.c] == false) {
 				BFScal[tmp.r + 1][tmp.c] = BFScal[tmp.r][tmp.c] + 1;
 				visited[tmp.r + 1][tmp.c] = true;
-				to_be_update.push(pos(tmp.r+1, tmp.c ));
+				to_be_update.push(pos(tmp.r + 1, tmp.c));
 				if (map[tmp.r + 1][tmp.c].type == 0) {
 					tmp.r++;
 					return tmp;
@@ -166,7 +168,7 @@ void do_one_clean(pos des) {
 			}
 		}
 	}
-	//¥i¥HÀu¤Æ
+
 	while (!Q.isempty()) {
 		pos p = Q.Rear();
 		Q.popRear();
@@ -183,7 +185,6 @@ void back_to_charge(pos cur) {
 			map[tmp.r][tmp.c].type = -2;
 			unclean--;
 		}
-
 		if (tmp.c + 1 < C) {
 			if (BFS_battery[tmp.r][tmp.c + 1] == BFS_battery[tmp.r][tmp.c] - 1) {
 				tmp.c++;
@@ -262,7 +263,10 @@ void back_to_origin(pos cur) {
 }
 
 pos clean(pos cur) {
+	if (cur.r == 202 && cur.c == 3)
+		int a = 0;
 	pos des = findunclean(cur);
+
 	Queue<pos> Q;
 	while (!to_be_update.isempty()) {
 		pos tmp = to_be_update.Front();
@@ -273,6 +277,11 @@ pos clean(pos cur) {
 
 	if (BFScal[des.r][des.c] + BFS_battery[des.r][des.c] > cur_battery) {
 		back_to_charge(cur);
+		while (!Q.isempty()) {
+			pos tmp = Q.Front();
+			Q.pop();
+			BFScal[tmp.r][tmp.c] = -1;
+		}
 		return battery;
 	}
 	else {
@@ -289,50 +298,46 @@ pos clean(pos cur) {
 }
 
 void initail_BFS_battery() {
-	BFS_battery[battery.r][battery.c] = 0;
-	pos tmp(battery.r, battery.c);
+	pos tmp = battery;
 	Queue<pos> Q;
 	Q.push(tmp);
+	BFS_battery[tmp.r][tmp.c] = 0;
 	visited[tmp.r][tmp.c] = true;
+
 	while (!Q.isempty()) {
 		tmp = Q.Front();
 		Q.pop();
-		//cout << tmp.r << " " << tmp.c << " " << BFS_battery[tmp.r][tmp.c]<<endl;
-
 		if (tmp.c + 1 < C) {
-			if (map[tmp.r][tmp.c + 1].type != 1 && visited[tmp.r][tmp.c + 1] == false) {
+			if (map[tmp.r][tmp.c + 1].type == 0 && BFS_battery[tmp.r][tmp.c + 1] == -1) {
 				BFS_battery[tmp.r][tmp.c + 1] = BFS_battery[tmp.r][tmp.c] + 1;
-				visited[tmp.r][tmp.c + 1] = true;
 				Q.push(pos(tmp.r, tmp.c + 1));
 			}
 		}
 		if (tmp.c - 1 >= 0) {
-			if (map[tmp.r][tmp.c - 1].type != 1 && visited[tmp.r][tmp.c - 1] == false) {
+			if (map[tmp.r][tmp.c - 1].type == 0 && BFS_battery[tmp.r][tmp.c - 1] == -1) {
 				BFS_battery[tmp.r][tmp.c - 1] = BFS_battery[tmp.r][tmp.c] + 1;
-				visited[tmp.r][tmp.c - 1] = true;
 				Q.push(pos(tmp.r, tmp.c - 1));
 			}
 		}
 		if (tmp.r + 1 < R) {
-			if (map[tmp.r + 1][tmp.c].type != 1 && visited[tmp.r + 1][tmp.c] == false) {
+			if (map[tmp.r + 1][tmp.c].type == 0 && BFS_battery[tmp.r + 1][tmp.c] == -1) {
 				BFS_battery[tmp.r + 1][tmp.c] = BFS_battery[tmp.r][tmp.c] + 1;
-				visited[tmp.r + 1][tmp.c] = true;
 				Q.push(pos(tmp.r + 1, tmp.c));
 			}
 		}
 		if (tmp.r - 1 >= 0) {
-			if (map[tmp.r - 1][tmp.c].type != 1 && visited[tmp.r - 1][tmp.c] == false) {
+			if (map[tmp.r - 1][tmp.c].type == 0 && BFS_battery[tmp.r - 1][tmp.c] == -1) {
 				BFS_battery[tmp.r - 1][tmp.c] = BFS_battery[tmp.r][tmp.c] + 1;
-				visited[tmp.r - 1][tmp.c] = true;
 				Q.push(pos(tmp.r - 1, tmp.c));
 			}
 		}
 	}
-
 }
 
 int main() {
 
+	double START, END;
+	START = clock();
 
 	inputFile.open("floor.data");
 	if (!inputFile)
